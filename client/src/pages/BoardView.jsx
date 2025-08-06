@@ -3,7 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import CreateTask from '../components/CreateTask';
-import TaskCard from '../components/TaskCard'; // Import the new TaskCard component
+import TaskCard from '../components/TaskCard';
+import Chat from '../components/Chat'; // Import the new Chat component
 
 const BoardView = () => {
   const [tasks, setTasks] = useState([]);
@@ -30,7 +31,6 @@ const BoardView = () => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // This function now uses the TaskCard component
   const renderTasks = (status) => {
     return tasks
       .filter(task => task.status === status)
@@ -60,6 +60,9 @@ const BoardView = () => {
           {renderTasks('Done')}
         </div>
       </div>
+      
+      {/* Add the Chat component here */}
+      <Chat boardId={boardId} />
     </div>
   );
 };
