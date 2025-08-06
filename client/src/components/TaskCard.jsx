@@ -1,38 +1,36 @@
 // client/src/components/TaskCard.jsx
 import React from 'react';
-import axios from 'axios';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-const TaskCard = ({ task, onTaskUpdate }) => {
-  const handleStatusChange = async (newStatus) => {
-    try {
-      const token = localStorage.getItem('token');
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-      // We only need to send the new status in the body
-      const body = { status: newStatus };
+const TaskCard = ({ task }) => {
+  // This hook provides all the necessary props for a draggable item
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: task._id });
 
-      // Call the PUT endpoint to update the task
-      await axios.put(`http://localhost:5000/api/tasks/${task._id}`, body, config);
-      
-      // Tell the parent component to refetch all tasks
-      onTaskUpdate();
-    } catch (error) {
-      console.error('Failed to update task status', error);
-    }
+  // This style applies the transformations during dragging
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    border: '1px solid #ddd',
+    padding: '10px',
+    margin: '10px 0',
+    backgroundColor: 'white',
+    borderRadius: '5px',
+    cursor: 'grab', // Changes the cursor to indicate it's draggable
   };
 
   return (
-    <div style={{ border: '1px solid #ddd', padding: '10px', margin: '10px 0', backgroundColor: 'white', borderRadius: '5px' }}>
+    // setNodeRef registers this div as a draggable item.
+    // {...attributes} and {...listeners} attach the necessary event handlers.
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <h4>{task.title}</h4>
       <p>{task.description}</p>
-      <div style={{ marginTop: '10px' }}>
-        <small>Move to:</small>
-        {/* Only show buttons for statuses the task is NOT currently in */}
-        {task.status !== 'To-Do' && <button onClick={() => handleStatusChange('To-Do')}>To-Do</button>}
-        {task.status !== 'In Progress' && <button onClick={() => handleStatusChange('In Progress')}>In Progress</button>}
-        {task.status !== 'Done' && <button onClick={() => handleStatusChange('Done')}>Done</button>}
-      </div>
     </div>
   );
 };
