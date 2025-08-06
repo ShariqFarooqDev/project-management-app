@@ -10,10 +10,31 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
 
-app.use(cors());
+// --- START OF CORS CONFIGURATION ---
+// Define the allowed origins
+const allowedOrigins = ['http://localhost:5173'];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true // This is important for handling cookies or authorization headers
+};
+
+app.use(cors(corsOptions));
+// --- END OF CORS CONFIGURATION ---
+
+
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } }); // Socket.io has its own cors config
+
 app.use(express.json());
 
 app.use('/api/auth', require('./routes/authRoutes'));
