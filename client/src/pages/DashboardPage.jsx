@@ -1,8 +1,8 @@
-// client/src/pages/RegisterPage.jsx
+// client/src/pages/DashboardPage.jsx
 import React from 'react';
 
-const RegisterPage = () => {
-  return <h2>Register Page</h2>;
+const DashboardPage = () => {
+  return <h2>Dashboard Page</h2>;
 };
 
-export default RegisterPage;
+export default DashboardPage;
