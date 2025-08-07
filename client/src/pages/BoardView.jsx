@@ -46,10 +46,36 @@ const BoardView = () => {
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
-    if (!over) return;
+
+    // --- NEW BUG FIX ---
+    // If dropped nowhere, or on the same item, do nothing.
+    if (!over || active.id === over.id) {
+      return;
+    }
+
     const taskId = active.id;
-    const newStatus = over.id;
     const activeTask = tasks.find(t => t._id === taskId);
+    
+    // Check if the drop target is a valid column.
+    const isAColumn = ['To-Do', 'In Progress', 'Done'].includes(over.id);
+    let newStatus;
+
+    if (isAColumn) {
+      // Case 1: Dropped directly on a column.
+      newStatus = over.id;
+    } else {
+      // Case 2: Dropped on another task. Find that task's status.
+      const overTask = tasks.find(t => t._id === over.id);
+      if (overTask) {
+        newStatus = overTask.status;
+      } else {
+        // If we can't find a valid target, abort.
+        return;
+      }
+    }
+    // --- END OF NEW BUG FIX ---
+    
+    // Only proceed if the status is actually changing
     if (activeTask && activeTask.status !== newStatus) {
       setTasks(prev => prev.map(t => (t._id === taskId ? { ...t, status: newStatus } : t)));
       try {
