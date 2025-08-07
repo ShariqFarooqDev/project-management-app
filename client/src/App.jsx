@@ -1,6 +1,6 @@
 // client/src/App.jsx
-import React, { useContext, useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -8,23 +8,19 @@ import BoardView from './pages/BoardView';
 import { ThemeContext } from './context/ThemeContext';
 import './App.css';
 
+// The Header component now gets everything it needs from context.
 const AppHeader = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to detect URL changes
   const { theme, toggleTheme } = useContext(ThemeContext);
   
-  // State to track if a user is logged in
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-
-  // This effect will run every time the URL changes, keeping the login state accurate
-  useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('token'));
-  }, [location]);
+  // We will get the login status from a new AuthContext later.
+  // For now, we check localStorage directly, which is simpler.
+  const token = localStorage.getItem('token');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setIsLoggedIn(false); // Update state immediately
-    navigate('/login');
+    // We force a page reload to ensure all state is cleared.
+    window.location.href = '/login';
   };
 
   return (
@@ -35,8 +31,8 @@ const AppHeader = () => {
       <button onClick={toggleTheme} className="theme-toggle">
         {theme === 'light' ? '🌙' : '☀️'}
       </button>
-      {/* Show button based on the reactive isLoggedIn state */}
-      {isLoggedIn && (
+      {/* This will now correctly show when a token is present */}
+      {token && (
         <button onClick={handleLogout} className="logout-button">Logout</button>
       )}
     </header>
@@ -44,7 +40,6 @@ const AppHeader = () => {
 };
 
 function App() {
-  // Note: We no longer need BrowserRouter here because it's in main.jsx
   return (
     <div className="app-container">
       <AppHeader />

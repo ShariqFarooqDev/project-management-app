@@ -1,13 +1,12 @@
 // client/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
-import './Auth.css'; // Import the shared auth styles
+import { Link } from 'react-router-dom';
+import './Auth.css';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -16,7 +15,8 @@ const LoginPage = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
       localStorage.setItem('token', response.data.token);
-      navigate('/');
+      // Force a reload to the dashboard page to update the header correctly.
+      window.location.href = '/';
     } catch (err) {
       setError('Login failed. Please check your credentials.');
       console.error(err);

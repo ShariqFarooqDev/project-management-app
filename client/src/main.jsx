@@ -8,11 +8,11 @@ import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* ThemeProvider must wrap the Router */}
+    {/* The ThemeProvider MUST wrap the Router to provide context correctly */}
     <ThemeProvider>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>,
-)
+);
