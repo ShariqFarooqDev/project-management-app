@@ -1,0 +1,27 @@
+/* client/src/components/TaskCard.css */
+.task-card {
+  background-color: var(--container-bg-color);
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px var(--shadow-color);
+  border-left: 4px solid var(--primary-color);
+  cursor: grab;
+}
+
+.task-card:active {
+  cursor: grabbing;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.task-card h4 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.task-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--light-text-color);
+}

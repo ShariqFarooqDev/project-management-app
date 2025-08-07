@@ -7,19 +7,15 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import CreateTask from '../components/CreateTask';
 import TaskCard from '../components/TaskCard';
 import Chat from '../components/Chat';
-import './BoardView.css'; // Import the new CSS file
+import './BoardView.css';
 
 const DroppableColumn = ({ id, title, tasks }) => {
   const { setNodeRef } = useDroppable({ id });
-
   return (
-    // Use the new CSS class instead of inline styles
     <div ref={setNodeRef} id={id} className="droppable-column">
       <h3>{title}</h3>
       <SortableContext items={tasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
-        {tasks.map(task => (
-          <TaskCard key={task._id} task={task} />
-        ))}
+        {tasks.map(task => <TaskCard key={task._id} task={task} />)}
       </SortableContext>
     </div>
   );
@@ -54,13 +50,8 @@ const BoardView = () => {
     const taskId = active.id;
     const newStatus = over.id;
     const activeTask = tasks.find(t => t._id === taskId);
-
     if (activeTask && activeTask.status !== newStatus) {
-      setTasks(prevTasks => 
-        prevTasks.map(t => 
-          t._id === taskId ? { ...t, status: newStatus } : t
-        )
-      );
+      setTasks(prev => prev.map(t => (t._id === taskId ? { ...t, status: newStatus } : t)));
       try {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -81,19 +72,20 @@ const BoardView = () => {
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="board-container">
+      <div className="board-header">
         <h2>{boardName}</h2>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        
-        <CreateTask boardId={boardId} onTaskCreated={fetchTasks} />
-
-        <div className="columns-container">
+      </div>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <CreateTask boardId={boardId} onTaskCreated={fetchTasks} />
+      <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+        <div className="columns-container" style={{ flex: 3 }}>
           {Object.keys(columns).map(status => (
             <DroppableColumn key={status} id={status} title={status} tasks={columns[status]} />
           ))}
         </div>
-        
-        <Chat boardId={boardId} />
+        <div style={{ flex: 1 }}>
+          <Chat boardId={boardId} />
+        </div>
       </div>
     </DndContext>
   );

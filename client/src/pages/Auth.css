@@ -1,0 +1,43 @@
+/* client/src/pages/Auth.css */
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: var(--container-bg-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  text-align: center;
+}
+
+.auth-container h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+}
+
+.auth-container form div {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.auth-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--light-text-color);
+}
+
+.auth-container button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.auth-container .auth-link {
+  margin-top: 20px;
+}
+
+.auth-container .auth-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}

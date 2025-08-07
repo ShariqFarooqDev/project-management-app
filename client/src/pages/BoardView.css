@@ -1,30 +1,34 @@
 /* client/src/pages/BoardView.css */
+.board-header {
+  margin-bottom: 20px;
+}
 
-.board-container {
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.board-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--text-color);
 }
 
 .columns-container {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
   gap: 20px;
 }
 
 .droppable-column {
-  width: 32%;
-  background-color: #f1f2f4; /* A light grey for the column background */
+  flex: 1;
+  background-color: var(--column-bg-color);
   padding: 15px;
   border-radius: 8px;
-  min-height: 400px;
+  min-height: 50vh;
 }
 
 .droppable-column h3 {
   margin-top: 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid #dcdcdc;
-  color: #333;
+  border-bottom: 2px solid var(--border-color);
+  color: #555;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-
-/* We will style the TaskCard directly in its own component file later */
