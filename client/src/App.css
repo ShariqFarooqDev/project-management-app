@@ -12,14 +12,35 @@
   box-shadow: 0 2px 4px var(--shadow-color);
   display: flex;
   align-items: center;
+  height: 64px;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .app-header h1 {
   color: var(--primary-color);
   font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .main-content {
   flex-grow: 1;
   padding: 20px 40px;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.logout-button {
+  background-color: var(--danger-color);
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
+.logout-button:hover {
+  background-color: var(--danger-hover-color);
 }
