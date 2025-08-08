@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/Task');
-const Board = require('../models/Board'); // We need this to verify board ownership
+const Board = require('../models/Board');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // @route   POST api/tasks
@@ -12,10 +12,12 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { title, description, boardId } = req.body;
 
-    // Check if the board exists and if the user owns it
-    const board = await Board.findById(boardId);
-    if (!board || board.owner.toString() !== req.user.id) {
-      return res.status(404).json({ error: 'Board not found or user not authorized' });
+    // Find the board and populate its members to check authorization
+    const board = await Board.findById(boardId).populate('members');
+    
+    // Check if the board exists and if the user is a member
+    if (!board || !board.members.some(member => member._id.toString() === req.user.id)) {
+      return res.status(403).json({ error: 'Board not found or user not authorized' });
     }
 
     const newTask = new Task({
@@ -39,10 +41,10 @@ router.get('/board/:boardId', authMiddleware, async (req, res) => {
   try {
     const { boardId } = req.params;
 
-    // Check if the board exists and if the user owns it
-    const board = await Board.findById(boardId);
-    if (!board || board.owner.toString() !== req.user.id) {
-        return res.status(404).json({ error: 'Board not found or user not authorized' });
+    // Check if the board exists and if the user is a member
+    const board = await Board.findById(boardId).populate('members');
+    if (!board || !board.members.some(member => member._id.toString() === req.user.id)) {
+        return res.status(403).json({ error: 'Board not found or user not authorized' });
     }
 
     const tasks = await Task.find({ boardId: boardId });
@@ -67,10 +69,10 @@ router.put('/:taskId', authMiddleware, async (req, res) => {
         }
 
         // We need to check if the user is authorized to update this task.
-        // We can do this by finding the board the task belongs to.
-        const board = await Board.findById(task.boardId);
-        if (!board || board.owner.toString() !== req.user.id) {
-            return res.status(401).json({ error: 'User not authorized' });
+        // We can do this by finding the board the task belongs to and checking if they are a member.
+        const board = await Board.findById(task.boardId).populate('members');
+        if (!board || !board.members.some(member => member._id.toString() === req.user.id)) {
+            return res.status(403).json({ error: 'User not authorized to update this task' });
         }
 
         // Update the task fields
