@@ -26,21 +26,3 @@
   flex-grow: 1;
   padding: 20px 40px;
 }
-
-.theme-toggle {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  margin-right: 15px;
-}
-
-.logout-button {
-  background-color: var(--danger-color);
-  font-size: 0.9rem;
-  padding: 8px 12px;
-}
-
-.logout-button:hover {
-  background-color: var(--danger-hover-color);
-}

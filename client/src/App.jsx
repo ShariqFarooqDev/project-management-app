@@ -28,9 +28,8 @@ const AppHeader = () => {
       <Link to="/" style={{ textDecoration: 'none', flexGrow: 1 }}>
         <h1>ProjectFlow</h1>
       </Link>
-      <button onClick={toggleTheme} className="theme-toggle">
-        {theme === 'light' ? '🌙' : '☀️'}
-      </button>
+      
+     
       {/* This will now correctly show when a token is present */}
       {token && (
         <button onClick={handleLogout} className="logout-button">Logout</button>
