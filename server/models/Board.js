@@ -11,8 +11,11 @@ const boardSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  // A board can have multiple members, we can add that later
-  // members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  // We're adding a new field to store the board members
+  members: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User' 
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Board', boardSchema);

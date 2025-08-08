@@ -23,26 +23,53 @@ const DroppableColumn = ({ id, title, tasks }) => {
 
 const BoardView = () => {
   const [tasks, setTasks] = useState([]);
-  const [boardName, setBoardName] = useState('');
+  const [board, setBoard] = useState(null); // Use a single state for the board
+  const [newMemberUsername, setNewMemberUsername] = useState('');
   const [error, setError] = useState('');
   const { boardId } = useParams();
 
-  const fetchTasks = useCallback(async () => {
+  const fetchBoardData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      const boardRes = await axios.get(`http://localhost:5000/api/boards/${boardId}`, config);
+      setBoard(boardRes.data);
+      
       const tasksRes = await axios.get(`http://localhost:5000/api/tasks/board/${boardId}`, config);
       setTasks(tasksRes.data);
-      setBoardName(`Board ID: ${boardId}`);
+
     } catch (err) {
-      setError('Failed to fetch tasks.');
+      setError('Failed to fetch board data.');
       console.error(err);
     }
   }, [boardId]);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchBoardData();
+  }, [fetchBoardData]);
+  
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    if (!newMemberUsername) return;
+    try {
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const body = { username: newMemberUsername };
+
+      const response = await axios.post(
+        `http://localhost:5000/api/boards/${boardId}/members`,
+        body,
+        config
+      );
+      setBoard(response.data); // Update the board state with the new member list
+      setNewMemberUsername('');
+      setError('');
+    } catch (err) {
+      setError('Failed to add member.');
+      console.error(err);
+    }
+  };
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
@@ -96,13 +123,17 @@ const BoardView = () => {
     'Done': tasks.filter(t => t.status === 'Done'),
   };
 
+  if (!board) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="board-header">
-        <h2>{boardName}</h2>
+        <h2>{board.name}</h2>
       </div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <CreateTask boardId={boardId} onTaskCreated={fetchTasks} />
+      <CreateTask boardId={boardId} onTaskCreated={fetchBoardData} />
       <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
         <div className="columns-container" style={{ flex: 3 }}>
           {Object.keys(columns).map(status => (
@@ -111,6 +142,26 @@ const BoardView = () => {
         </div>
         <div style={{ flex: 1 }}>
           <Chat boardId={boardId} />
+          {/* Member Management Section */}
+          <div style={{ marginTop: '20px', border: '1px solid #ccc', padding: '15px' }}>
+            <h3>Board Members</h3>
+            <ul>
+              {board.members.map(member => (
+                <li key={member._id}>{member.username}</li>
+              ))}
+            </ul>
+            <form onSubmit={handleAddMember}>
+              <input
+                type="text"
+                placeholder="Enter username to add"
+                value={newMemberUsername}
+                onChange={(e) => setNewMemberUsername(e.target.value)}
+                style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+                required
+              />
+              <button type="submit" style={{ width: '100%', padding: '8px' }}>Add Member</button>
+            </form>
+          </div>
         </div>
       </div>
     </DndContext>

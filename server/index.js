@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const Board = require('./models/Board'); // Import the Board model
 
 dotenv.config();
 connectDB();
@@ -46,9 +47,19 @@ io.on('connection', socket => {
   });
 
   // When a message is sent
-  socket.on('sendMessage', ({ message, boardId }) => {
-    // Broadcast the message to everyone in that specific board's room
-    io.to(boardId).emit('receiveMessage', { message });
+  socket.on('sendMessage', async ({ message, boardId }) => {
+    try {
+      // Find the board and check if the user is a member (you would need a way to get the user ID here,
+      // which is typically done with a token validation on the socket connection. For this example,
+      // we'll assume the user is authorized for simplicity and focus on the broadcast logic)
+      const board = await Board.findById(boardId);
+      if (board) {
+        // Broadcast the message to everyone in that specific board's room
+        io.to(boardId).emit('receiveMessage', { message });
+      }
+    } catch (error) {
+      console.error('Error broadcasting message:', error);
+    }
   });
 
   socket.on('disconnect', () => {
