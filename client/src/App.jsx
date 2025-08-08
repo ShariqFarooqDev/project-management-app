@@ -1,17 +1,15 @@
 // client/src/App.jsx
-import React, { useContext } from 'react';
+import React from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import BoardView from './pages/BoardView';
-import { ThemeContext } from './context/ThemeContext';
 import './App.css';
 
 // The Header component now gets everything it needs from context.
 const AppHeader = () => {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useContext(ThemeContext);
   
   // We will get the login status from a new AuthContext later.
   // For now, we check localStorage directly, which is simpler.
