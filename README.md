@@ -50,7 +50,7 @@ It's built to provide a modern, single-page application experience for small tea
 
 #### 1️⃣ Clone the repository:
 \`\`\`bash
-git clone <your-repo-url>
+git clone [https://github.com/ShariqFarooqDev/project-management-app](https://github.com/ShariqFarooqDev/project-management-app)
 cd project-management-app
 \`\`\`
 
