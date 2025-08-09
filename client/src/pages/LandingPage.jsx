@@ -7,7 +7,7 @@ import './Auth.css';
 const LoginPage = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Use the useNavigate hook
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -15,18 +15,9 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
-      const token = response.data.token;
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', response.data.token);
       
-      // Decode the JWT and save the user ID to localStorage
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        localStorage.setItem('userId', payload.id);
-      } catch (decodeError) {
-        console.error('Error decoding JWT:', decodeError);
-        localStorage.removeItem('userId'); // Clear any old, invalid user ID
-      }
-      
+      // Use navigate to redirect without a full page reload
       navigate('/dashboard'); 
     } catch (err) {
       setError('Login failed. Please check your credentials.');

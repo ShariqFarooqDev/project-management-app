@@ -1,18 +1,20 @@
 // client/src/pages/DashboardPage.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Import Link
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const DashboardPage = () => {
   const [boards, setBoards] = useState([]);
   const [newBoardName, setNewBoardName] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Use the useNavigate hook
 
   const fetchBoards = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setError('No token found, please log in.');
+        // If no token exists, redirect to login page
+        navigate('/login');
         return;
       }
       const config = {

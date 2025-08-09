@@ -2,7 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const Board = require('../models/Board');
-const User = require('../models/User'); // Import the User model
+const Task = require('../models/Task'); // Import the Task model
+const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // @route   POST api/boards
@@ -113,6 +114,36 @@ router.post('/:boardId/members', authMiddleware, async (req, res) => {
   }
 });
 
-// We will add routes for updating and deleting boards later
+// @route   DELETE api/boards/:boardId
+// @desc    Delete a board and all its tasks
+// @access  Private (Owner only)
+router.delete('/:boardId', authMiddleware, async (req, res) => {
+    try {
+      const { boardId } = req.params;
+  
+      const board = await Board.findById(boardId);
+  
+      if (!board) {
+        return res.status(404).json({ error: 'Board not found' });
+      }
+  
+      // Check if the authenticated user is the owner of the board
+      if (board.owner.toString() !== req.user.id) {
+        return res.status(403).json({ error: 'Only the board owner can delete a board' });
+      }
+  
+      // Delete all tasks associated with the board
+      await Task.deleteMany({ boardId });
+  
+      // Delete the board itself
+      await Board.findByIdAndDelete(boardId);
+  
+      res.json({ message: 'Board and associated tasks deleted successfully' });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Server Error');
+    }
+  });
+
 
 module.exports = router;

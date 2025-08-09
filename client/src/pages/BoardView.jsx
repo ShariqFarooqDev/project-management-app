@@ -1,6 +1,6 @@
 // client/src/pages/BoardView.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { DndContext, closestCenter, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -23,10 +23,12 @@ const DroppableColumn = ({ id, title, tasks }) => {
 
 const BoardView = () => {
   const [tasks, setTasks] = useState([]);
-  const [board, setBoard] = useState(null); // Use a single state for the board
+  const [board, setBoard] = useState(null);
   const [newMemberUsername, setNewMemberUsername] = useState('');
   const [error, setError] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const { boardId } = useParams();
+  const navigate = useNavigate();
 
   const fetchBoardData = useCallback(async () => {
     try {
@@ -62,7 +64,7 @@ const BoardView = () => {
         body,
         config
       );
-      setBoard(response.data); // Update the board state with the new member list
+      setBoard(response.data);
       setNewMemberUsername('');
       setError('');
     } catch (err) {
@@ -71,11 +73,21 @@ const BoardView = () => {
     }
   };
 
+  const handleDeleteBoard = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      await axios.delete(`http://localhost:5000/api/boards/${boardId}`, config);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to delete board.');
+      console.error(err);
+    }
+  };
+
   const handleDragEnd = async (event) => {
     const { active, over } = event;
 
-    // --- NEW BUG FIX ---
-    // If dropped nowhere, or on the same item, do nothing.
     if (!over || active.id === over.id) {
       return;
     }
@@ -83,26 +95,20 @@ const BoardView = () => {
     const taskId = active.id;
     const activeTask = tasks.find(t => t._id === taskId);
     
-    // Check if the drop target is a valid column.
     const isAColumn = ['To-Do', 'In Progress', 'Done'].includes(over.id);
     let newStatus;
 
     if (isAColumn) {
-      // Case 1: Dropped directly on a column.
       newStatus = over.id;
     } else {
-      // Case 2: Dropped on another task. Find that task's status.
       const overTask = tasks.find(t => t._id === over.id);
       if (overTask) {
         newStatus = overTask.status;
       } else {
-        // If we can't find a valid target, abort.
         return;
       }
     }
-    // --- END OF NEW BUG FIX ---
     
-    // Only proceed if the status is actually changing
     if (activeTask && activeTask.status !== newStatus) {
       setTasks(prev => prev.map(t => (t._id === taskId ? { ...t, status: newStatus } : t)));
       try {
@@ -111,7 +117,7 @@ const BoardView = () => {
         await axios.put(`http://localhost:5000/api/tasks/${taskId}`, { status: newStatus }, config);
       } catch (error) {
         console.error('Failed to update task status', error);
-        fetchTasks();
+        fetchBoardData();
         setError('Failed to move task.');
       }
     }
@@ -126,11 +132,34 @@ const BoardView = () => {
   if (!board) {
     return <div>Loading...</div>;
   }
+  
+  // Get the user ID from the token in localStorage
+  const token = localStorage.getItem('token');
+  let loggedInUserId = null;
+  if (token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const decoded = JSON.parse(jsonPayload);
+      loggedInUserId = decoded.id;
+    } catch (e) {
+      console.error('Failed to decode token:', e);
+    }
+  }
+
+  // Check if the logged-in user is the board owner
+  const isOwner = board.owner && String(board.owner) === loggedInUserId;
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="board-header">
         <h2>{board.name}</h2>
+        {isOwner && (
+          <button onClick={() => setShowModal(true)} className="delete-button">Delete Board</button>
+        )}
       </div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <CreateTask boardId={boardId} onTaskCreated={fetchBoardData} />
@@ -150,20 +179,35 @@ const BoardView = () => {
                 <li key={member._id}>{member.username}</li>
               ))}
             </ul>
-            <form onSubmit={handleAddMember}>
-              <input
-                type="text"
-                placeholder="Enter username to add"
-                value={newMemberUsername}
-                onChange={(e) => setNewMemberUsername(e.target.value)}
-                style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                required
-              />
-              <button type="submit" style={{ width: '100%', padding: '8px' }}>Add Member</button>
-            </form>
+            {isOwner && (
+              <form onSubmit={handleAddMember}>
+                <input
+                  type="text"
+                  placeholder="Enter username to add"
+                  value={newMemberUsername}
+                  onChange={(e) => setNewMemberUsername(e.target.value)}
+                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+                  required
+                />
+                <button type="submit" style={{ width: '100%', padding: '8px' }}>Add Member</button>
+              </form>
+            )}
           </div>
         </div>
       </div>
+      
+      {showModal && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this board? This action cannot be undone.</p>
+            <div className="modal-actions">
+              <button onClick={handleDeleteBoard} className="delete-button">Yes, Delete</button>
+              <button onClick={() => setShowModal(false)} className="cancel-button">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </DndContext>
   );
 };
