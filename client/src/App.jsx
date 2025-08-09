@@ -21,9 +21,11 @@ const AppHeader = () => {
     window.location.href = '/';
   };
 
+  const navLinkPath = token ? '/dashboard' : '/';
+
   return (
     <header className="app-header">
-      <Link to="/" style={{ textDecoration: 'none', flexGrow: 1 }}>
+      <Link to={navLinkPath} style={{ textDecoration: 'none', flexGrow: 1 }}>
         <h1>ProjectFlow</h1>
       </Link>
       
@@ -54,3 +56,4 @@ function App() {
 }
 
 export default App;
+      
